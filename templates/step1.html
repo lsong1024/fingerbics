@@ -1,0 +1,94 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <title>손가락 운동</title>
+</head>
+<body>
+<br>
+<br>
+<table align="right">
+  <tr>
+    <td><button id="executeButton" onclick="startTimerAndExecute()">실행</button></td>
+    <td><div id="timerDisplay">00:00</div></td>
+    <td><img src="/static/c.png"  width="50" height="50"></td>
+  </tr>
+</table>
+<br>
+<br>
+<br>
+<br>
+<table align="center">
+  <tr>
+    <td>&nbsp;&nbsp;&nbsp;&nbsp;<img src="/static/motion1.gif" border="10" style="border-color:red;" width="300" height="300">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td>&nbsp;&nbsp;&nbsp;&nbsp;<img src="/static/motion2.gif" border="10" style="border-color:lightgreen;" width="300" height="300">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td>&nbsp;&nbsp;&nbsp;&nbsp;<img src="/static/motion3.gif" border="10" style="border-color:blue;" width="300" height="300">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+  </tr>
+  <tr>
+	<td  align="center"><font size=12><b>1단계</b></font></td>
+	<td align="center"><font size=12><b>2단계</b></font></td>
+	<td align="center"><font size=12><b>3단계</b></font></td>
+  </tr>
+
+</table>
+
+<br>
+<br>
+
+
+
+<script>
+  let timer;
+  let seconds = 90; // 90초를 기본값으로 설정
+
+  function startTimer() {
+    timer = setInterval(function () {
+      const minutes = Math.floor(seconds / 60);
+      const displayMinutes = (minutes < 10) ? `0${minutes}` : minutes;
+      const displaySeconds = (seconds % 60 < 10) ? `0${seconds % 60}` : seconds % 60;
+
+      document.getElementById('timerDisplay').innerText = `${displayMinutes}:${displaySeconds}`;
+
+      if (seconds <= 0) {
+        clearInterval(timer);
+        // 타이머 종료 시 원하는 동작을 수행하거나 아무 동작도 하지 않도록 할 수 있습니다.
+      }
+
+      seconds--;
+    }, 1000);
+  }
+</script>
+
+
+<script>
+        document.getElementById("executeButton").addEventListener("click", function() {
+            // 실행 버튼이 클릭되었을 때 이벤트 발생
+            executeScript();
+            startTimer();
+        });
+
+        function executeScript() {
+            // 라즈베리 파이 FastAPI 서버로 POST 요청 보내기
+            fetch("http://192.168.50.217:8000/execute-script", {
+                method: "POST",
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("파이썬 파일 실행 실패: " + data.error);
+                } else {
+                    alert("파이썬 파일 실행 성공: " + data.message);
+                }
+            })
+            .catch(error => {
+                alert("오류 발생: " + error.message);
+            });
+        }
+    </script>
+
+
+
+
+</body>
+{% endblock %}
